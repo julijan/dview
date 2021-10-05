@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css" integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous"/>
+    <title>Document</title>
+    <script src="../dview.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            window.d = new DView({
+                appTitle : 'Add user',
+                users : []
+            }, {
+                userAdd : function(root, node) {
+                    // node is the button because we used d-click on it
+                    // since we know that the button is a child of adduser, we can safely use node.data()
+                    // all nodes that have no data of their own, inherit data from their parent node
+                    // we could use root.query(['adduser']).data() if we wanted to be explicit
+                    let user = {
+                        firstname : node.data().firstname,
+                        lastname : node.data().lastname
+                    }
+
+                    // add the user to users
+                    // note the use of .add on array instead of .push, .push would add the user to data, but would not trigger the update
+                    // when updating arrays, you either need to replace the actual array, or use the extendedArray capabilities provided on all arrays in DViewData
+                    this.data.users.add(user);
+                    
+                    // clear adduser.firstname and adduser.lastname so that the values don't get re-added if the user was to click the button again
+                    node.data().firstname = '';
+                    node.data().lastname = '';
+
+                    // clear the input fields within adduser
+                    root.queryAll(['adduser', 'input']).forEach((input) => {
+                        input.node.value = '';
+                    });
+                    
+                },
+
+                skillAdd : function(root, node) {
+                    let userData = node.parentFind('user').data();
+
+                    if (!(userData.skills instanceof Array)) {
+                        userData.setVal('skills', []);
+                    }
+
+                    let skillInput = node.parentFind('user').query(['skillcurrent']).node;
+                    let skillName = skillInput.value;
+
+                    userData.skills.add({skillName : skillName});
+
+                    // clear input
+                    skillInput.value = '';
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <h1><appTitle></appTitle></h1>
+        <div class="row">
+            <div class="col-6">
+    
+                <adduser class="row pb-3">
+                    <div class="col-4">
+                        <input type="text" d-model="firstname" class="form-control" placeholder="First name">
+                    </div>
+                    <div class="col-4">
+                        <input type="text" d-model="lastname" class="form-control" placeholder="Last name">
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-primary" d-click="userAdd">
+                            <i class="fa fa-check"></i> Add
+                            <firstname></firstname>
+                            <lastname></lastname>
+                        </button>
+                    </div>
+                </adduser>
+    
+    
+                <users class="list-group">
+                    <user class="list-group-item d-flex justify-content-between align-items-center">
+                        <firstName></firstName>
+                        <lastName></lastName>
+    
+                        <div class="py-3">
+                            Skills
+    
+                            <skills class="list-group mb-3">
+                                <skill class="list-group-item">
+                                    <skillName></skillName>
+                                </skill>
+                            </skills>
+    
+                            <div class="input-group">
+                                <input type="text" d-name="skillcurrent" class="form-control">
+                                <button class="btn btn-primary" d-click="skillAdd">
+                                    <i class="fa fa-check"></i> Add
+                                </button>
+                            </div>
+    
+                        </div>
+                    </user>
+                </users>
+            </div>
+        </div>
+    </div>
+    
+
+
+</body>
+</html>

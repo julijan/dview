@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css" integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA==" crossorigin="anonymous"/>
+    <title>Test2</title>
+    <script src="../dview.js"></script>
+    <script>
+        // generate 100 random numbers to show in a paginated list
+        const numbers = [];
+        for (let i = 0; i < 100; i++) {
+            numbers.push(Math.round(Math.random() * 10000));
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            window.d = new DView({
+                numbers : numbers,
+                numberSelected : -1,
+                numberIsSelected : function() {
+                    return this.data.numberSelected > -1;
+                },
+                pageItems : function() {
+                    let start = (this.data.pagination.page - 1) * 10;
+                    return this.data.numbers.slice(start, start + 10);
+                },
+                pagination : {
+                    page : 1,
+
+                    // number of pages will wary depending on the number of numbers (user may delete numbers)
+                    pages : function() {
+                        return Math.ceil(this.data.numbers.length / 10);
+                    },
+
+                    // computed property, return an array of numbers that should be rendered as pagination items
+                    pageNumbers : function() {
+                        let numbers = [];
+                        for (let i = 0; i < this.data.pagination.pages; i++) {
+                            numbers.push(i + 1);
+                        }
+                        return numbers;
+                    }
+                }
+            }, {
+                pageSet : function(root, node) {
+                    this.data.pagination.page = node.data();
+                },
+
+                numberSet : function(root, node) {
+                    this.data.numberSelected = node.data();
+                },
+
+                unselect : function() {
+                    this.data.numberSelected = -1;
+                },
+
+                numberDelete : function(root, node) {
+                    // pages are not zero based in this case, so we subtract one to get the zoer based index
+                    let pageIndex = this.data.pagination.page - 1;
+
+                    let itemIndex = pageIndex * 10 + node.getListIndex();
+                    let number = this.data.numbers[itemIndex];
+                    
+                    // if selected number is being deleted, de-select the number
+                    if (this.data.numberSelected == number) {
+                        this.exec('unselect');
+                    }
+
+                    // use remove method instead of native methods such as splice to allow DView to detect the change
+                    this.data.numbers.remove(itemIndex);
+                }
+            },
+            // dynamic styles
+            {
+                'pagination.pageitem' : {
+                    active : function(node) {
+                        return node.data() == this.data.pagination.page;
+                    }
+                },
+
+                'pageitems.div' : {
+                    'bg-dark text-white' : function(node) {
+                        return node.data() == this.data.numberSelected;
+                    }
+                },
+            });
+
+
+            // we used a few computed properties which are not reactive, we need to subscribe the nodes
+            // that rely on computed properties to data they need to listen for changes
+
+            // pageitems and pagenumbers are computed properties and would not react to change of page and numbers, make it react
+            d.query(['pageitems']).subscribe(d.data.pagination, 'page');
+            d.query(['pageitems']).subscribe(d.data, 'numbers');
+
+            d.query(['pagenumbers']).subscribe(d.data, 'numbers');
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+
+        <h3 d-if="! numberisselected">Select number</h3>
+        <h3 d-if="numberisselected">
+            Selected <numberselected></numberselected>
+            <button class="btn btn-light" d-click="unselect">Unselect</button>
+        </h3>
+    
+        <pageItems class="list-group">
+            <div d-click="numberSet" class="list-group-item d-flex justify-content-between">
+                <item></item>
+                <button class="btn btn-danger btn-sm" d-click="numberDelete">
+                    x
+                </button>
+            </div>
+        </pageItems>
+    
+        <pagination class="d-block pt-3">
+            <div class="d-flex align-items-center justify-content-center">
+                <pagenumbers class="pagination">
+                    <pageItem class="page-item" d-click="pageSet">
+                        <item class="page-link"></item>
+                    </pageItem>
+                </pagenumbers>
+                <div class="ps-3">
+                    Page <page></page>
+                </div>
+            </div>
+        </pagination>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css" integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA==" crossorigin="anonymous"/>
+    <title>Document</title>
+    <script src="../dview.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            window.d = new DView({
+                users : [
+                    {
+                        name : 'Test',
+                        score : 100
+                    },
+                    {
+                        name : 'Boss',
+                        score : 33
+                    }
+                ],
+                games : [
+                    {
+                        players : [
+                            {
+                                name : 'Test'
+                            },
+                            {
+                                name : 'Boss'
+                            }
+                        ],
+                        winner : 'Test'
+                    },
+                    {
+                        players : [
+                            {
+                                name : 'John'
+                            },
+                            {
+                                name : 'Doe'
+                            }
+                        ],
+                        winner : 'Doe'
+                    }
+                ],
+                happines : {
+                    food : 10,
+                    other : 3
+                },
+                appName : 'Demo app'
+            })
+        });
+    </script>
+</head>
+<body>
+
+    <appname></appname>
+
+    <div class="row">
+        <div class="col-6">
+            <users class="list-group">
+                <user class="list-group-item d-flex justify-content-between">
+                    <name></name>
+                    <score></score>
+                </user>
+            </users>
+        </div>
+    </div>
+
+    <happines>
+        <div>
+            Food: <food></food>
+        </div>
+        <div>
+            Other: <other></other>
+        </div>
+    </happines>
+
+    <games class="list-group">
+        <game class="list-group-item">
+            Winner <winner></winner>
+            <players class="list-group">
+                <player class="list-group-item">
+                    <name></name>
+                    <input type="text">
+                </player>
+            </players>
+        </game>
+    </games>
+</body>
+</html>
