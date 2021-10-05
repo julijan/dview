@@ -1,6 +1,6 @@
 DView is a JavaScript library for DOM rendering. While inspired by Vue.js, it's aim is to be a lean library, not a framework. The goal was to achieve similar capabilities that Vue.js provides, without the bulkiness, no assumptions on file hierarchy, with better separation of concerns, no compiling and faster. To start using DView, include dview.js in the head of the page and create an instance of DView.
 
-Documentation can be found in docs, open index.html in your browser.
+Documentation can be found in docs, open index.html in your browser, or visit https://julijan.github.io/dview/
 
 For example applications developed using dview.js, look at examples folder.
 
