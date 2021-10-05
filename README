@@ -1,0 +1,49 @@
+DView is a JavaScript library for DOM rendering. While inspired by Vue.js, it's aim is to be a lean library, not a framework. The goal was to achieve similar capabilities that Vue.js provides, without the bulkiness, no assumptions on file hierarchy, with better separation of concerns, no compiling and faster. To start using DView, include dview.js in the head of the page and create an instance of DView.
+
+Documentation can be found in docs, open index.html in your browser.
+
+For example applications developed using dview.js, look at examples folder.
+
+If you have a feature request or have found a bug, you are welcome to post that in issues.
+
+A small example:
+
+[JS]
+const app = new DView({
+    userCount : function() {
+        return this.data.users.length;
+    },
+    users : [
+        {
+            username : 'user1',
+            email : 'user1@test.com'
+        },
+        {
+            username : 'user2',
+            email : 'user2@test.com'
+        }
+    ]
+}, {
+    userAdd : function() {
+        let username = 'user' + (this.data.userCount() + 1);
+        let user = {
+            username,
+            email : username + '@test.com'
+        }
+        this.data.users.push(user);
+        this.query(['users']).redraw();
+    }
+});
+
+[HTML]
+<div>
+    User count: <userCount></userCount>
+</div>
+<users>
+    <user>
+        <div>
+            <name></name>, <email></email>
+        </div>
+    </user>
+</users>
+<button d-click="userAdd">Add user</button>
