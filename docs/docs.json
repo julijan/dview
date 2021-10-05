@@ -1,0 +1,568 @@
+{
+    "classes" : [
+        {
+            "name" : "DView",
+            "constructorArguments" : "data{}, actions{}?, dynamicStyles{}?",
+            "description" : "To initialize DView on a HTML page, you need to initialize DView. It will initialize the given data making it reactive, set up the actions and dynamic styles, parse the HTML and output the rendered page. Once data has changed, the change is immediately reflected in the rendered page.",
+            "methods" : [
+                {
+                    "name" : "query",
+                    "arguments" : "path[]",
+                    "description" : "Given a path (array of strings), return the first node matching the path. If you want to query multiple nodes use queryAll. Shortcut to <i>DViewNode.query</i> of the root node",
+                    "returns" : "DViewNode",
+                    "directUse" : true
+                },
+                {
+                    "name" : "queryAll",
+                    "arguments" : "path[]",
+                    "description" : "Given a path, return all nodes matching the path. Shortcut to <i>DViewNode.queryAll</i> of the root node",
+                    "returns" : "DViewNode[]",
+                    "directUse" : true
+                },
+                {
+                    "name" : "withinPath",
+                    "arguments" : "pathHaystack[], pathNeedle[], matchLength(boolean), matchStart(boolean), matchEnd(boolean)",
+                    "description" : "Returns true if pathNeedle is within pathHaystack, otherwise false. Path segments have to match in sequence and in order. If matchLength is true, haystack and needle have to have the same length. If matchStart is used, needle has to come at the beginning of the haystack, if matchEnd is true, needle has to be at the end of haystack. Not used internally by DView, but can be useful if you need to query an exact path in a complex DOM. Given haystack ['a', 'b', 'c'] needle ['a', 'b'] would match while needle ['a', 'c'] woudln't match.",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "withinPathLoose",
+                    "arguments" : "pathHaystack[], pathNeedle[]",
+                    "description" : "Returns true if pathNeedle is within pathHaystack, otherwise false. Path segments have to match in order. Given haystack ['a', 'b', 'c'] needles ['a', 'b'] and ['a', 'c'] both match.",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "parse",
+                    "arguments" : "",
+                    "description" : "Generates the objectModel. Object model is the object representation of the HTML structure. You shouldn't need to use this method directly, it's used internally when DView is initialized",
+                    "returns" : "DViewNode (root)",
+                    "directUse" : false
+                },
+                {
+                    "name" : "dom",
+                    "arguments" : "",
+                    "description" : "Returns the entire generated DOM. You shouldn't need to use this method directly",
+                    "returns" : "HTMLElement",
+                    "directUse" : false
+                },
+                {
+                    "name" : "render",
+                    "arguments" : "",
+                    "description" : "Renders the page based on the generated objectModel",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "reset",
+                    "arguments" : "",
+                    "description" : "Re-runs DView.parse. You shouldn't need to use this method directly",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "initData",
+                    "arguments" : "data{}?",
+                    "description" : "If data is an array returns the array, otherwise recursively initializes the given data. Data is recursively converted to DViewData instances in order for it to be reactive",
+                    "returns" : "DViewData|array",
+                    "directUse" : false
+                },
+                {
+                    "name" : "dataChanged",
+                    "arguments" : "",
+                    "description" : "Called by any instance of DViewData when it's data has changed",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "processStyles",
+                    "arguments" : "stylesRaw",
+                    "description" : "Processes the dynamc styles given as 3rd argument of DView constructor. Returns the styles in format [ { path : ['path', 'to', 'node'], styles : { 'className1' : fn1, ... } }, ... ]",
+                    "returns" : "array",
+                    "directUse" : false
+                },
+                {
+                    "name" : "stylesUpdate",
+                    "arguments" : "",
+                    "description" : "Update the class attribute of all nodes that are using dynamic styles. This happens when a node is (re)drawn, and when data related to node has changed, hence you shouldn't have to call it directly.",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "exec",
+                    "arguments" : "actionName(string), arguments[]",
+                    "description" : "Execute given action. Actions are passed as second argument of DView constructor in format { actionName : fn }. Exec is internally called when d-click attribute is used on a node, but you can call it from anywhere, even from computed properties. Callback function is executed with <i>this</i> being the DView instance with the arguments given in the array are passed",
+                    "returns" : "any",
+                    "directUse" : true
+                }
+            ],
+            "properties" : [
+                {
+                    "name" : "objectModel",
+                    "type" : "DViewNode",
+                    "description" : "Instance of DViewNode on body tag - <b>root</b> node",
+                    "directUse" : true
+                },
+                {
+                    "name" : "benchmarkEnabled",
+                    "type" : "Boolean",
+                    "description" : "If true, DView will measure the time it took to render the page. Render time will be available in DView.renderTime, and logged to console if DView.debug is true",
+                    "directUse" : true
+                },
+                {
+                    "name" : "ignoreTags",
+                    "type" : "string[]",
+                    "description" : "Array of strings, containing names of reserved HTML tags, which will not be treated as dataNode, unless they are an immediate child of a list node. That means that DView won't treat these nodes as having missingData",
+                    "directUse" : true
+                },
+                {
+                    "name" : "data",
+                    "type" : "DViewData",
+                    "description" : "Root data node. This is the data the root DViewNode would return and is the object given as first argument to DView constructor recursively converted to instances of DViewData",
+                    "directUse" : true
+                },
+                {
+                    "name" : "debug",
+                    "type" : "Boolean",
+                    "description" : "If true, some debugging information will be logged to console",
+                    "directUse" : true
+                },
+                {
+                    "name" : "startTime",
+                    "type" : "number|null",
+                    "description" : "If benchmarkEnabled is true, startTime is used to calculate the time needed to render the page",
+                    "directUse" : false
+                },
+                {
+                    "name" : "styles",
+                    "type" : "array",
+                    "description" : "Processed dynamic styles that were given as 3rd parameter to DView constructor. It stores the processed styles in format: [{ path : ['path', 'to', 'nodes'], styles : { 'className' : fn, 'className2' : fn } }]. If the fn returns true, corresponding class name will be applied to nodes that match the path",
+                    "directUse" : false
+                },
+                {
+                    "name" : "actions",
+                    "type" : "object|null",
+                    "description" : "Actions are an object in format { actionName : callback, actionName2 : callback2, ... }. They come from the second argument to DView constructor, and are stored as given, so while they are meant to be an object such as described, they will be whatever the second argument was"
+                },
+                {
+                    "name" : "DOMOriginal",
+                    "type" : "string",
+                    "description" : "Original DOM, contents of body",
+                    "directUse" : false
+                },
+                {
+                    "name" : "rendered",
+                    "type" : "boolean",
+                    "description" : "If true, DView has rendered the page",
+                    "directUse" : false
+                },
+                {
+                    "name" : "renderTime",
+                    "type" : "number|null",
+                    "description" : "If DView.benchmarkEnabled is true, this will hold the number of milliseconds it took for the page to render",
+                    "directUse" : true
+                }
+            ]
+        },
+        {
+            "name" : "DViewNode",
+            "constructorArguments" : "dview(DView()), node(HTMLElement), path[], parent(DViewNode), listIndex(number)?",
+            "description" : "Main building block of a page using DView. DView.objectModel is an instance of DViewNode (root node). You should never have to create an instance of this class, but you will need to understand it's methods to be able to query and navigate the DOM tree.",
+            "methods" : [
+                {
+                    "name" : "query",
+                    "arguments" : "path[]",
+                    "description" : "Given a path (array of strings), return the first node matching the path relative to current node. If you want to query multiple nodes use queryAll. If you want to query relative to document, then use DViewNode.root().query or DView.query. The query method uses DView.withinPathLoose to decide whether any node matches the path. If no nodes match the path null is returned",
+                    "returns" : "DViewNode|null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "queryAll",
+                    "arguments" : "path[]",
+                    "description" : "Given a path, return all nodes matching the path relative to current node. The queryAll method uses DView.withinPathLoose to decide whether any node matches the path",
+                    "returns" : "DViewNode[]",
+                    "directUse" : true
+                },
+                {
+                    "name" : "data",
+                    "arguments" : "",
+                    "description" : "Returns the node's data. Data can be a string or a number, or an instance of DViewData depending on the data structure. If the node doesn't have it's own data, parent's data is returned",
+                    "returns" : "any",
+                    "directUse" : true
+                },
+                {
+                    "name" : "subscribe",
+                    "arguments" : "DViewData, key(string)",
+                    "description" : "When the given key is changed on the given DViewData, node will be notifed and redrawn"
+                },
+                {
+                    "name" : "redraw",
+                    "arguments" : "",
+                    "description" : "Redraw node an it's children recursively",
+                    "returns" : "null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "childNodes",
+                    "arguments" : "",
+                    "description" : "Returns the child nodes that are an instance of DViewNode (all nodes except text nodes). To access all children use property DViewNode.children",
+                    "returns" : "DViewNode[]",
+                    "directUse" : true
+                },
+                {
+                    "name" : "ignoredTag",
+                    "arguments" : "",
+                    "description" : "Returns true if node's tagName is in DView.ignoredTags, false otherwise",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "isList",
+                    "arguments" : "",
+                    "description" : "Returns true if node's data is an instance of Array, false otherwise",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "isDataNode",
+                    "arguments" : "",
+                    "description" : "Returns true if node is expected to have data at some point. The exact logic is ! node.ignoredTag() && ! this.parent.isList() && typeof this.listIndex !== 'number'",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "missingData",
+                    "arguments" : "",
+                    "description" : "Returns true if node is expected to have data at some point but has no data yet",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "show",
+                    "arguments" : "",
+                    "description" : "Returns true if node should be rendered. To dynamically compute node's visibility, add d-if to the DOM node",
+                    "returns" : "Boolean",
+                    "directUse" : false
+                },
+                {
+                    "name" : "nodeContains",
+                    "arguments" : "DOMElement",
+                    "description" : "Returns true if node's DOM node (DViewNode.node) is the parent of the given DOM node",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "setShow",
+                    "arguments" : "showCallback(function), data(DViewData), key(string)",
+                    "description" : "Sets node's show condition (showCondition property of DViewNode) to showCallback, sets the showConditionData to data and sets the showConditionKey to key. This decides whether the node will be rendered or not. When the show method is called internally, showCondition will be called, this being DView instance, first argument being the showConditionData[showConditionKey] (or just showCondition data if showConditionKey is null), and the second argument being the node itself. If both showCondition and showCondition key are null, then showCondition receives only one argument, the node",
+                    "returns" : "null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "root",
+                    "arguments" : "",
+                    "description" : "Gets the root node. Same as DView.objectModel",
+                    "returns" : "DViewNode",
+                    "directUse" : true
+                },
+                {
+                    "name" : "styles",
+                    "arguments" : "",
+                    "description" : "Get all related dynamic styles for this node",
+                    "returns" : "styles[]",
+                    "directUse" : false
+                },
+                {
+                    "name" : "getClassNames",
+                    "arguments" : "",
+                    "description" : "Returns an array of classNames of this node. This includes any class names defined on the DOM node itself, and all dynamic styles that are attached to this node using dynamic styles. Used internally.",
+                    "returns" : "classNames[]",
+                    "directUse" : false
+                },
+                {
+                    "name" : "parentNode",
+                    "arguments" : "",
+                    "description" : "Returns the first parent node that is a data node. It will only return null when called on the root node",
+                    "returns" : "DViewNode|null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "parentFind",
+                    "arguments" : "parentName(string)",
+                    "description" : "Return the first parent whose name equals the given string. If no parent with given parentName is found null is returned",
+                    "returns" : "DViewNode|null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "hasData",
+                    "arguments" : "",
+                    "description" : "Returns true if node has it's own data, false otherwise.",
+                    "returns" : "Boolean",
+                    "directUse" : true
+                },
+                {
+                    "name" : "dataType",
+                    "arguments" : "",
+                    "description" : "Returns the type of DViewNode.data",
+                    "returns" : "string",
+                    "directUse" : true
+                },
+                {
+                    "name" : "childrenUpdate",
+                    "arguments" : "",
+                    "description" : "Update child nodes of the node, called internally when list nodes are re-drawn.",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "isFlatArrayItem",
+                    "arguments" : "",
+                    "description" : "Returns true if DViewNode.parentNode() is a list and whose data is an instance of Array, false otherwise",
+                    "returns" : "Boolean",
+                    "directUse" : false
+                },
+                {
+                    "name" : "isFlatArrayItemValue",
+                    "arguments" : "",
+                    "description" : "Returns true if node's name is 'item' and the node is a flatArrayItem, false otherwise",
+                    "returns" : "Boolean",
+                    "directUse" : false
+                },
+                {
+                    "name" : "cacheClear",
+                    "arguments" : "",
+                    "description" : "Clears DViewNode.dataCached on the current node and all it's children recursively",
+                    "returns" : "null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "destroy",
+                    "arguments" : "",
+                    "description" : "Destroys the node, node will no longer render or listen to data updates",
+                    "returns" : "null",
+                    "directUse" : false
+                }
+            ],
+
+            "properties" : [
+                {
+                    "name" : "dview",
+                    "type" : "DView",
+                    "description" : "DView instance",
+                    "directUse" : true
+                },
+                {
+                    "name" : "children",
+                    "type" : "array",
+                    "description" : "Array of DViewNode's children. It contains instances of DViewNode and textNodes in order they need to be rendered inside the node. Use childNodes method to get only DViewNode children of the node",
+                    "directUse" : true
+                },
+                {
+                    "name" : "parent",
+                    "type" : "DViewNode|null",
+                    "description" : "DView instance. If root node parent is null. Use parentNode method to get the first parent which is a dataNode",
+                    "directUse" : true
+                },
+                {
+                    "name" : "listIndex",
+                    "type" : "number|null",
+                    "description" : "If the DViewNode is a list item, then it is a number, otherwise it's null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "node",
+                    "type" : "HTMLElement",
+                    "description" : "The actual DOM node",
+                    "directUse" : true
+                },
+                {
+                    "name" : "name",
+                    "type" : "string",
+                    "description" : "Node's name. It is the lower case string which is inherited from DOM node's tag name. Name is used in paths and when querying",
+                    "directUse" : true
+                },
+                {
+                    "name" : "path",
+                    "type" : "string[]",
+                    "description" : "Node's path. Describes the path one would have to follow to reach the node starting from the root (body)",
+                    "directUse" : true
+                },
+                {
+                    "name" : "showCondition",
+                    "type" : "function|null",
+                    "description" : "If function, then the given function decides whether the node will be shown or not. This function is called by show method.",
+                    "directUse" : false
+                },
+                {
+                    "name" : "showConditionData",
+                    "type" : "DViewData|null",
+                    "description" : "showConditionData[showConditionKey] is passed to showCondition as first argument, second argument being the node itself, this being the DView instance",
+                    "directUse" : false
+                },
+                {
+                    "name" : "showConditionKey",
+                    "type" : "string|number|null",
+                    "description" : "A string or number that specifies which key from showConditionData is passed to showCondition by show method",
+                    "directUse" : false
+                },
+                {
+                    "name" : "HTMLData",
+                    "type" : "Boolean",
+                    "description" : "If true, node's data will be treated as HTML, defaults to false - tread data as text",
+                    "directUse" : true
+                },
+                {
+                    "name" : "dataSubscribed",
+                    "type" : "array",
+                    "description" : "Nodes record of which data it is subscribed to, array of arrays in format [[DViewData, key], ...]",
+                    "directUse" : true
+                },
+                {
+                    "name" : "destroyed",
+                    "type" : "Boolean",
+                    "description" : "If true, node is no longer rendered and ignores data updates",
+                    "directUse" : false
+                },
+                {
+                    "name" : "inDOM",
+                    "type" : "Boolean",
+                    "description" : "If true, node is in the DOM tree",
+                    "directUse" : false
+                },
+                {
+                    "name" : "initialized",
+                    "type" : "Boolean",
+                    "description" : "If true, the node is fully initialized",
+                    "directUse" : false
+                },
+                {
+                    "name" : "dataCached",
+                    "type" : "any",
+                    "description" : "Data is being cached on nodes, and updates when DViewData instance notifies the interested nodes of the change. This is rather useful for computed properties. To clear the cache you can simply set cachedData to null for the node, it's data will be re-calculated on the next redraw",
+                    "directUse" : true
+                },
+                {
+                    "name" : "listItem",
+                    "type" : "HTMLElement|null",
+                    "description" : "Only lists have this. List will use this node as template for it's children",
+                    "directUse" : false
+                },
+                {
+                    "name" : "classNamesOriginal",
+                    "type" : "string[]",
+                    "description" : "Array containing all the class names that were defined on DOM node at the time DView was initialized",
+                    "directUse" : false
+                }
+            ]
+        },
+        {
+            "name" : "DViewData",
+            "constructorArguments" : "dview(DView)",
+            "description" : "Reactive data storage. Notifies interested nodes when it's data changes. You can get/set DViewData's data in a same way as you would with an object.",
+            "methods" : [
+                {
+                    "name" : "setVal",
+                    "arguments" : "key(string), value(any)",
+                    "description" : "Sets the value of a key on current instance of DViewData. If the key doesn't exist then it creates the key and sets the value. Objects and arrays are recursively converted to DViewData where appropriate.",
+                    "returns" : "null",
+                    "directUse" : true
+                },
+                {
+                    "name" : "nodesUsingData",
+                    "arguments" : "",
+                    "description" : "Return an array of DViewNodes that use this DViewData",
+                    "returns" : "DViewNode[]",
+                    "directUse" : false
+                },
+                {
+                    "name" : "uses",
+                    "arguments" : "node(DViewNode), key(string)",
+                    "description" : "Registers the given node as a node using this data. This is how DView makes DOM elements re-render when their data has changed. It's recommended to use DViewNode.subscribe(DViewData, key) instead because the node, once removed from the DOM tree, will automatically unsubscribe from all data subscribed using it's subscribe method",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "changed",
+                    "arguments" : "key(string)",
+                    "description" : "DViewData runs this when it's data has changed in order to notify interested nodes.",
+                    "returns" : "null",
+                    "directUse" : false
+                },
+                {
+                    "name" : "clone",
+                    "arguments" : "",
+                    "description" : "Returns a cloned DViewData",
+                    "returns" : "DViewData",
+                    "directUse" : false
+                }
+            ],
+
+            "properties" : [
+                {
+                    "name" : "data",
+                    "type" : "Object",
+                    "description" : "Raw data. This object's items are not reactive, so you should not set values on this object as it won't trigger the update. Proper way to set values is DViewData.key = value",
+                    "directUse" : true
+                },
+                {
+                    "name" : "dview",
+                    "type" : "DView",
+                    "description" : "DView instance",
+                    "directUse" : true
+                },
+                {
+                    "name" : "nodes",
+                    "type" : "array",
+                    "description" : "All nodes that use this data are kept in this array in format [DViewNode, key]. When DViewData[key] changes, all nodes listening for changes on this key will be updated. Key can be a <b>*</b> in which case the listening node is updated when any key changes",
+                    "directUse" : true
+                }
+            ]
+        }
+    ],
+
+    "attributes" : [
+        {
+            "name" : "d-if",
+            "sampleValue" : "! body.hideNode",
+            "description" : "Conditionally render the node. If a DOM node has the d-if attribute, when the node is initialized by DView it will use DViewNode.setShow to set the conditional show. Value of the d-if will be interpreted differently based on the following rules:<br>- If the value starts with <b>!</b> the condition is negated<br>- if the value contains no <b>dots</b>, the condition will be applied to data of the first parent that isDataNode<br>- if the value contains dots, the value is treated as an absolute <b>path</b> for example body.showPage would result in node shown only if root.data().showPage is true, or is a function that returns true",
+            "hasClosingTag" : true,
+            "usesValue" : true
+        },
+        {
+            "name" : "d-model",
+            "sampleValue" : "user.name",
+            "description" : "Only implemented for input fields. When d-model is defined, any change to input will update the data specified by d-model attribute value. You can use dots in the name to specify an absolute path, or specify just a string to set the data on current node's data",
+            "hasClosingTag" : false,
+            "usesValue" : true
+        },
+        {
+            "name" : "d-click",
+            "sampleValue" : "actionName",
+            "description" : "Binds a click event handler to the node. The specified <i>actionName</i> should exist in the actions object provided as second argument of DView constructor. When the node is clciked, action with action name is executed with <i>this</i> being the DView instance, and 2 arguments: root(DViewNode) and the clicked node(DViewNode). DView will stop the propagation of the click event",
+            "hasClosingTag" : false,
+            "usesValue" : true
+        },
+        {
+            "name" : "d-html",
+            "sampleValue" : "",
+            "description" : "Setting the d-html attribute on node makes it's data be treated as HTML, so if you expect some of the data to contain HTML strings, then you should set the d-html attribute on the corresponding node",
+            "hasClosingTag" : true,
+            "usesValue" : false
+        },
+        {
+            "name" : "d-ignore",
+            "sampleValue" : "",
+            "description" : "DView will ignore all HTML tags that are specified in DView.ignoreTags. If you want to have a named tag that is not expected to have data, but exists for easier querying you should set this tag. If the node has no d-ignore, and it has no data of it's own, and it's parent has no data of it's own, the node and it's children won't be drawn. So while it's safe to ommit the d-ignore for 2 nested levels, it's a good practice to add this attribute for tags that will never have data",
+            "hasClosingTag" : true,
+            "usesValue" : false
+        },
+        {
+            "name" : "d-name",
+            "sampleValue" : "renamednode",
+            "description" : "Force the value of this attribute to become the nodes name instead of node's tagName. The rendered node will have a tag name of the orginal DOM node, but DViewNode.name will be the value of this attribute hence you will be able to query the node by it's name, and if any data is available for the newly defined name, the node will use it",
+            "hasClosingTag" : true,
+            "usesValue" : true
+        }
+    ]
+}

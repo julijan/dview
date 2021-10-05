@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DView Docs</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css" integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="docs_style.css">
+    <script src="../dview.js"></script>
+    <script src="docs_js.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+
+        <div class="row px-3">
+            <index class="d-none d-sm-block col-5 col-lg-3 col-xl-2">
+                <div class="position-fixed index pe-5 ps-2 h-100">
+                    <div class="pt-4">
+                        <select class="form-control">
+                            <option value="methods">Methods</option>
+                            <option value="properties">Properties</option>
+                            <option value="attributes">Attributes</option>
+                        </select>
+                    </div>
+                    <classes class="pt-2 pb-3 pe-5" d-if="! body.pageAttributes">
+                        <class class="d-block pt-3">
+                            <name class="d-block text-primary cursor-pointer" d-click="goToClass"></name>
+                            <methods class="d-block ps-2" d-if="body.pageMethods">
+                                <method class="d-block cursor-pointer" d-click="goToMethod">
+                                    <small><name></name></small>
+                                </method>
+                            </methods>
+                            <properties d-if="body.pageProperties">
+                                <property class="d-block ps-2 cursor-pointer" d-click="goToProperty">
+                                    <small><name></name></small>
+                                </property>
+                            </properties>
+                        </class>
+                    </classes>
+                </div>
+            </index>
+
+            <docs class="col-12 col-sm-7 col-lg-9 col-xl-10">
+
+                <h2 class="pt-3">DView Docs</h2>
+        
+                <div class="pt-2 pb-3">
+                    DView is a JavaScript library for DOM rendering. While inspired by Vue.js, it's aim is to be a light-weight library, not a framework.
+                    The goal was to achieve similar capabilities that Vue.js provides, without the bulkiness, no assumptions on file hierarchy, with better separation of concerns, no compiling and faster.
+                    To start using DView, include dview.js in the head of the page and create an instance of DView.
+                </div>
+        
+                <search d-ignore>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="py-3 col-12 col-md-7 col-lg-4 col-xl-3">
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                                <input type="text" d-model="body.searchString" class="form-control" placeholder="Search">
+                                <button class="btn btn-secondary" d-click="searchClear">
+                                    <i class="fa fa-remove"></i>
+                                </button>
+                            </div>
+                        </div>
+            
+                        <div class="col-12 col-md-3 text-end">
+                            <button class="btn btn-light" d-click="toggleIndirectlyUsed">
+                                <i class="fa fa-book"></i>
+                                <span d-if="hideNotDirectlyUsed">Show</span>
+                                <span d-if="! hideNotDirectlyUsed">Hide</span>
+                                non-directly used
+                                <span d-if="pageMethods">methods</span>
+                                <span d-if="pageProperties">properties</span>
+                            </button>
+                        </div>
+                    </div>
+                </search>
+        
+        
+        
+                <classes d-if="! body.pageAttributes">
+                    <class class="d-block pt-4">
+                        <h3 class="mb-0"><name class="text-primary"></name>(<constructorArguments class="text-secondary"></constructorArguments>)</h3>
+                        <div class="pt-2">
+                            <description></description>
+                        </div>
+                        <methods class="d-block ps-3" d-if="body.pageMethods">
+                            <method class="d-block pt-4">
+                                <h4 class="mb-1"><name></name>(<arguments></arguments>)</h4>
+                                <div class="pt-1 ps-2">
+                                    <div>Returns: <b><returns></returns></b></div>
+                                    <description d-html></description>
+                                </div>
+                            </method>
+                        </methods>
+                        <properties class="d-block ps-3" d-if="body.pageProperties">
+                            <property class="d-block pt-4">
+                                <h4 class="mb-1"><name></name></h4>
+                                <div class="pt-1 ps-2">
+                                    <div>Type: <b><type></type></b></div>
+                                    <description d-html></description>
+                                </div>
+                            </property>
+                        </properties>
+                    </class>
+                </classes>
+
+                <div d-if="body.pageAttributes">
+                    <h4 class="pt-3">Special attributes</h4>
+                    <div class="pt-2">
+                        DViewNode is rendered in the final DOM with all of it's attributes preserved. There are a few attributes that give you the ability to alter the behavior of the DViewNode:
+                    </div>
+                    <attributes class="d-block pt-2">
+                        <attribute class="d-block pt-3">
+                            <h4 class="mb-1 text-primary"><name></name></h4>
+                            <h6 class="mb-1 text-secondary">
+                                &lt;node
+                                <name class="text-dark d-inline"></name><div class="d-inline text-dark" d-if="usesValue"><span class="text-secondary">="</span><sampleValue></sampleValue><span class="text-secondary">"&gt;</span><span class="text-secondary" d-if="hasClosingTag">&lt;/node</span></div><span d-if="hasClosingTag">&gt;</span>
+                            </h6>
+                            <div class="pt-1 ps-2">
+                                <description d-html></description>
+                            </div>
+                        </attribute>
+                    </attributes>
+                </div>
+            </docs>
+        </div>
+
+
+        <div class="pt-3 pb-2 pe-3 text-end">
+            <small><i>This page was rendered with dview.js in <pagerendertime></pagerendertime>ms</i></small>
+        </div>
+
+    </div>
+</body>
+</html>
