@@ -30,8 +30,7 @@ const app = new DView({
             username,
             email : username + '@test.com'
         }
-        this.data.users.push(user);
-        this.query(['users']).redraw();
+        this.data.users.add(user);
     }
 });
 
