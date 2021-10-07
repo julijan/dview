@@ -564,5 +564,16 @@
             "hasClosingTag" : true,
             "usesValue" : true
         }
+    ],
+
+    "tags" : [
+        {
+            "name" : "<d-component name=\"component-name\">...</d-component>",
+            "description" : "Registers a new re-usable component. Once defined, component can be used anywhere in the DOM using tag <d-component-name><d-component-name>. Components are a good way to encapsulate a piece of DOM which will be used more than once"
+        },
+        {
+            "name" : "<item></item>",
+            "description" : "It has a special meaning only when a child of flat array list node. For example if data contains { numbers : [1, 2, 3] } you could have <numbers><div class=\"item-styling\"><item></item></div></numbers>. Allows for nesting the item value"
+        }
     ]
 }
