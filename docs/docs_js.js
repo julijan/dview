@@ -14,6 +14,12 @@ window.addEventListener('DOMContentLoaded', async function() {
         pageProperties : function() {
             return this.data.page === 'properties';
         },
+        pageTags : function() {
+            return this.data.page === 'tags';
+        },
+        indexShow : function() {
+            return this.data.pageMethods || this.data.pageProperties;
+        },
         page : 'methods',
         classes : function() {
             let classes = this.data.classesRaw;
@@ -119,7 +125,7 @@ window.addEventListener('DOMContentLoaded', async function() {
 
         'search' : {
             'd-none' : function() {
-                return this.data.page === 'attributes';
+                return ! this.data.indexShow;
             }
         }
     });
@@ -138,12 +144,7 @@ window.addEventListener('DOMContentLoaded', async function() {
 
     d.data.setVal('classesRaw', docs.classes);
     d.data.setVal('attributes', docs.attributes);
-    d.queryAll(['classes']).forEach((classNode) => {
-        classNode.redraw();
-    });
-    d.queryAll(['attributes']).forEach((attr) => {
-        attr.redraw();
-    });
+    d.data.setVal('tags', docs.tags);
 
     // show only classes with at least one match
     let classes = d.queryAll(['class']);
@@ -167,7 +168,6 @@ window.addEventListener('DOMContentLoaded', async function() {
             'searchstring'
         );
     }
-
 
     // page select dropdown
     let pageDropdown = d.query(['index', 'select']);

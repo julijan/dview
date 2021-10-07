@@ -22,9 +22,10 @@
                             <option value="methods">Methods</option>
                             <option value="properties">Properties</option>
                             <option value="attributes">Attributes</option>
+                            <option value="tags">Tags</option>
                         </select>
                     </div>
-                    <classes class="pt-2 pb-3 pe-5" d-if="! body.pageAttributes">
+                    <classes class="pt-2 pb-3 pe-5" d-if="body.indexShow">
                         <class class="d-block pt-3">
                             <name class="d-block text-primary cursor-pointer" d-click="goToClass"></name>
                             <methods class="d-block ps-2" d-if="body.pageMethods">
@@ -81,7 +82,7 @@
         
         
         
-                <classes d-if="! body.pageAttributes">
+                <classes d-if="body.indexShow">
                     <class class="d-block pt-4">
                         <h3 class="mb-0"><name class="text-primary"></name>(<constructorArguments class="text-secondary"></constructorArguments>)</h3>
                         <div class="pt-2">
@@ -126,6 +127,22 @@
                         </attribute>
                     </attributes>
                 </div>
+
+                <div d-if="body.pageTags">
+                    <h4 class="pt-3">Special tags</h4>
+                    <div class="pt-2">
+                        There are only two specially treated tag names at the moment:
+                    </div>
+                    <tags class="d-block pt-2">
+                        <tag class="d-block pt-3">
+                            <h4 class="mb-1 text-primary"><name></name></h4>
+                            <div class="pt-1 ps-2">
+                                <description></description>
+                            </div>
+                        </tag>
+                    </tags>
+                </div>
+
             </docs>
         </div>
 
