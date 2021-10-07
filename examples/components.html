@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../dview.js"></script>
+    <title>Components test</title>
+    <script>
+        window.addEventListener('load', function() {
+            window.d = new DView({
+                users : [
+                    {
+                        name : 'Test',
+                        email : 'test@test.com'
+                    },
+                    {
+                        name : 'Test1',
+                        email : 'test1@test.com'
+                    }
+                ]
+            });
+        });
+    </script>
+</head>
+<body>
+
+    <d-best-component></d-best-component>
+    <users>
+        <!-- use component -->
+        <d-user></d-user>
+    </users>
+    <d-best-component></d-best-component>
+
+    <!-- define component -->
+    <d-component name="user" style="display: block;">
+        <name></name>, <email></email>
+    </d-component>
+
+    <!-- define component -->
+    <d-component name="best-component">
+        <div>
+            BTW, I am the best component ever
+        </div>
+    </d-component>
+
+</body>
+</html>
