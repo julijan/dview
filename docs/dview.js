@@ -1,5 +1,5 @@
 // Copyright (c) 2021 Julijan Andjelic
-// DView v0.3.2
+// DView v0.3.3
 class DView {
 
     constructor(data, actions, styles) {
@@ -37,6 +37,9 @@ class DView {
             'input', 'select', 'button', 'label'
         ];
 
+        // user defined components (d-component)
+        this.components = {};
+        this.initComponents();
 
         this.DOMOriginal = document.body.innerHTML;
         this.rendered = false;
@@ -75,16 +78,35 @@ class DView {
             let child = children[i];
             if (child.nodeType == 1) {
                 // Tag
+                let component = this.components[child.tagName.toLowerCase()];
+                let isComponent = component != undefined;
                 if (root.isList()) {
                     let data = root.data();
                     let node = root.listNode();
                     // list
                     for (let i = 0; i < data.length; i++) {
                         let pathNew = Array.from(path);
-                        root.children.push(this.parse(new DViewNode(this, this.parent ? this.parent.listItem.cloneNode(true) : node.cloneNode(true), pathNew, root, i), Array.from(path)));
+                        if (! isComponent) {
+                            root.children.push(this.parse(new DViewNode(this, this.parent ? this.parent.listItem.cloneNode(true) : node.cloneNode(true), pathNew, root, i), Array.from(path)));
+                        } else {
+                            // component
+                            let cmp = component.clone();
+                            cmp.parent = root;
+                            cmp.listIndex = i;
+                            cmp.pathSet(pathNew);
+                            root.children.push(cmp);
+                        }
                     }
                 } else {
-                    root.children.push(this.parse(new DViewNode(this, child, Array.from(path), root), Array.from(path)));
+                    if (! isComponent) {
+                        root.children.push(this.parse(new DViewNode(this, child, Array.from(path), root), Array.from(path)));
+                    } else {
+                        // component
+                        let cmp = component.clone();
+                        cmp.parent = root;
+                        cmp.pathSet(Array.from(path));
+                        root.children.push(cmp);
+                    }
                 }
             } else {
                 // other node types, preserve as they are
@@ -113,6 +135,31 @@ class DView {
     reset() {
         document.body.innerHTML = this.DOMOriginal;
         this.objectModel = this.parse();
+    }
+
+    initComponents() {
+        let components = document.querySelectorAll('d-component');
+        for (let i = 0; i < components.length; i++) {
+            let component = components[i];
+            let attributes = component.getAttributeNames();
+            if (attributes.indexOf('name') == -1) {
+                console.warn('Skipped component with no name');
+                continue;
+            }
+            let name = component.getAttribute('name');
+
+            if (this.components[name] instanceof DViewNode) {
+                console.warn(`Component ${name} already defined, skipping`);
+                continue;
+            }
+
+            component.setAttribute('d-name', name);
+
+            this.components['d-' + name] = this.parse(new DViewNode(this, component.cloneNode(true)), []);
+
+            // remove from DOM tree
+            component.parentNode.removeChild(component);
+        }
     }
 
     initData(data) {
@@ -506,15 +553,17 @@ class DViewNode {
 
         this.listIndex = typeof listIndex === 'number' ? listIndex : null;
 
-
+        
+        
         if (! (path instanceof Array)) {
             path = [];
         } else {
             path = Array.from(path);
         }
-
+        
         this.node = node;
         this.name = node.tagName.toLowerCase();
+        if (this.name === 'tag') {console.log(listIndex)}
         this.children = [];
         this.path = path;
         this.listItem = null;
@@ -821,6 +870,8 @@ class DViewNode {
 
         let raw = this.dataRaw();
 
+        if (raw === null) {return null;}
+
         if (raw instanceof DViewData) {
             return raw;
         }
@@ -857,23 +908,23 @@ class DViewNode {
         if (this.name == 'body' && this.parent == null) {
             return this.dview.data;
         }
-        let source = this.parent.data();
 
-        /*
-        if (this.ignoredTag()) {
-            return source;
-        }*/
+        // only should be the case with components
+        if (this.parent == null) {
+            return null;
+        }
+
+        let source = this.parent.data();
 
         let data;
         
         if (typeof this.listIndex === 'number' && this.parent.data() instanceof Array) {
             data = source[this.listIndex];
         } else {
-            if (typeof source === 'undefined') {
+            if (typeof source === 'undefined' || source === null) {
                 return this.parent.data();
             }
             if (typeof source[this.name] === 'undefined') {
-                //return new DViewData(this.dview);
                 return source;
             }
             data = source[this.name];
@@ -997,8 +1048,21 @@ class DViewNode {
             
             if (node == null) {return false;}
 
-            let childCount = this.childNodes().length;
+            let childNodes = this.childNodes();
+            let childCount = childNodes.length;
 
+            // if a child has been initialized before there was data for parent it may be missing the listIndex
+            // this would happen if the parent's data is meant to be an array, but was not defined yet at the time the node was initialized
+            let missingIndex = childNodes.some((child) => {
+                return child.listIndex === null;
+            });
+
+            if (missingIndex) {
+                // re-index nodes
+                for (let i = 0; i < childCount; i++) {
+                    childNodes[i].listIndex = i;
+                }
+            }
 
             if (data.length > childCount) {
                 // add missing children
@@ -1320,6 +1384,37 @@ class DViewNode {
         this.dataCached = null;
         this.childNodes().forEach((child) => {
             child.cacheClear();
+        });
+    }
+
+    // clone node and it's children recursively
+    clone() {
+        let node = new DViewNode(this.dview, this.nodeOriginal.cloneNode(true), Array.from(this.path), this.parent, this.listIndex);
+        node.children = Array.from(this.children);
+
+        node.showCondition = this.showCondition;
+        node.showConditionData = this.showConditionData;
+        node.showConditionKey = this.showConditionKey;
+
+        for (let i = 0; i < node.children.length; i++) {
+            if (node.children[i] instanceof DViewNode) {
+                node.children[i] = node.children[i].clone();
+                node.children[i].parent = node;
+            } else {
+                node.children[i] = node.children[i].cloneNode(true);
+            }
+        }
+
+        return node;
+    }
+
+    // set node's path, and update children paths recurively
+    pathSet(path) {
+        path = Array.from(path);
+        this.path = Array.from(path);
+        path.push(this.name);
+        this.childNodes().forEach((child) => {
+            child.pathSet(path);
         });
     }
 }
